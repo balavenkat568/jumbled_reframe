@@ -1,102 +1,88 @@
-🧩 README.md
-# Jumbled Reframe Ordering using Greedy TSP
+# 🧠 SSIM-Based Video Frame Reconstruction
 
-This project reorders shuffled video frames (or image sequences) based on their pairwise similarity matrix.  
-It uses a **greedy Traveling Salesman Problem (TSP)** approach to determine the most continuous order of frames.
-
----
-
-## 📘 Algorithm Overview
-
-The program loads a precomputed similarity matrix between frames — where each value `similarity[i][j]` represents how similar frame *i* is to frame *j*.
-
-It then constructs a path (ordering of frames) such that each next frame is the **most similar** to the current frame, minimizing discontinuities.
-
----
-
-## ⚙️ How It Works
-
-1. **Input:**  
-   A NumPy file `similarity_matrix.npy` containing an NxN similarity matrix.
-
-2. **Algorithm Steps:**
-   - Start from the first frame (index `0`).
-   - At each step, find the *unvisited* frame with the highest similarity to the current frame.
-   - Append that frame to the sequence.
-   - Repeat until all frames are visited.
-   - Save the resulting order to `frame_order_final.npy`.
-
-3. **Output:**  
-   - `frame_order_final.npy`: an array of frame indices representing the reconstructed order.
-   - A “forward continuity score” indicating how smooth the ordering is.
-
----
-
-## 🧠 Example Command
-
+## 🐍 Command to Run
 ```bash
-python c594bf17-5ffe-490f-84bb-6621af98c518.py
+python rebuild_video.py
+```
 
+## 🧩 Example Output
+```
+Extracted 300 frames from jumbled_video.mp4
+Loaded 300 frames for reconstruction.
+Frame order estimated using SSIM similarity.
+Smoothness (forward): 0.9471, Smoothness (reverse): 0.8024
+✅ Keeping forward order — smoother sequence confirmed.
+🎬 Reconstructed video saved to: C:\Users\balav\OneDrive\Pictures\video reconstruction\reconstructed_forward.mp4
+🕒 Total time: 320.45s
+```
 
-Example output:
+## 📦 Dependencies
+- Python 3.x
+- NumPy
+- OpenCV
+- scikit-image
 
-🧩 Loading similarity matrix...
-Shape: (120, 120)
-🚀 Solving frame order using greedy TSP approach...
-✅ Order saved to ../data/frame_order_final.npy
-📈 Forward continuity score: 0.9432
+### Install requirements:
+```bash
+pip install numpy opencv-python scikit-image tqdm
+```
 
-📦 Dependencies
+## 📂 Folder Structure
+```
+video reconstruction/
+├── jumbled_video.mp4
+├── rebuild_video.py
+├── frames/
+│   ├── frame_0000.jpg
+│   ├── frame_0001.jpg
+│   └── ...
+├── reconstructed_forward.mp4
+└── execution_time_log.txt
+```
 
-Python 3.x
+## 🧩 Key Function: SSIM_Reconstruction()
 
-NumPy
+**Input:**
+- A shuffled input video file (`jumbled_video.mp4`)
 
-Install requirements:
+**Output:**
+- Reconstructed video with natural forward motion (`reconstructed_forward.mp4`)
+- Execution time log (`execution_time_log.txt`)
 
-pip install numpy
+## ⚙️ Logic Overview
+1. **Frame Extraction**  
+   The video is decomposed into individual frames and saved as images.
 
-📂 Folder Structure
-project/
-├── src/
-│   └── c594bf17-5ffe-490f-84bb-6621af98c518.py
-├── data/
-│   ├── similarity_matrix.npy
-│   └── frame_order_final.npy
+2. **Preprocessing**  
+   Frames are converted to grayscale and downsampled to smaller resolution (160×90) for faster comparison.
 
-🧩 Key Function: tsp_reorder(similarity)
-Input:
+3. **SSIM Matrix Computation**  
+   For every frame pair `(i, j)`, a **Structural Similarity (SSIM)** score is calculated.  
+   This builds an `N × N` matrix representing how visually similar each frame is to the others.
 
-similarity: A square NumPy array (N, N) of similarity scores.
+4. **Frame Ordering (Greedy Traversal)**  
+   Start from frame `0`. Repeatedly select the **most similar unvisited frame** to the current one.  
+   Continue until all frames are ordered.
 
-Output:
+5. **Smoothness Validation**  
+   The average SSIM between consecutive frames is computed in both directions (forward & reverse).  
+   The smoother direction is automatically chosen for final reconstruction.
 
-A list of frame indices representing the optimal ordering.
+6. **Video Reconstruction**  
+   Frames are written to a new `.mp4` file following the computed order.  
+   Total execution time is logged.
 
-Logic:
+## 📈 Advantages
+✅ Produces a **natural, forward-flowing video**  
+✅ Works without deep learning — purely similarity-based  
+✅ Automatically detects and fixes reversed sequences  
+✅ Easy to run on any machine with Python and OpenCV  
 
-Mark all frames as unvisited.
+## ⚠️ Limitations
+- SSIM comparison is **computationally expensive** for large videos (O(N²)).  
+- Works best for **short clips (≤10s @ 30fps)** with consistent lighting and motion.  
+- Does not handle scene cuts or abrupt transitions.
 
-Start at frame 0.
-
-Repeatedly select the unvisited frame with the highest similarity to the last visited one.
-
-Continue until all frames are visited.
-
-📈 Advantages
-
-Simple and fast greedy solution for frame sequencing.
-
-Works well when similarity matrix is well-structured.
-
-Useful for unsupervised video reconstruction or temporal ordering tasks.
-
-⚠️ Limitations
-
-Greedy method may not find the optimal TSP path.
-
-Works best when similarity scores strongly reflect sequential relationships.
-
-✨ Author
-
-balavenkat568 (Bala Venkat Kandepalli)
+## ✨ Author
+**balavenkat568 (Bala Venkat Kandepalli)**  
+_Project: Jumbled Frame Reconstruction using SSIM Similarity_
